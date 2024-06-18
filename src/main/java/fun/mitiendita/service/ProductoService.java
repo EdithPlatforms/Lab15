@@ -48,7 +48,7 @@ public class ProductoService {
     }
     
     public Producto getProductoById(Long id) {
-        return restTemplate.getForObject(apiUrl + "productos/" + id, Producto.class);
+        return restTemplate.getForObject(apiUrl + "productos/" + id + "/", Producto.class);
     }
     
     private double calcularPromedioEstrellas(List<Review> reviews) {
