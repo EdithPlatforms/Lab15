@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Órdenes</title>
+    <!-- Enlace a Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Enlace a Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        .producto-imagen {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        body {
+            padding-top: 80px; /* Adjust the value based on your navbar height */
+        }
+    </style>
+</head>
+<body>
+	<!-- Navbar -->
+	<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+	    <div class="container">
+	        <!-- Navbar brand -->
+	        <a class="navbar-brand" href="/"><i class="fas fa-shopping-bag"></i> Mi Tienda</a>
+	        <!-- Navbar toggler -->
+	        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+	            <span class="navbar-toggler-icon"></span>
+	        </button>
+	        <!-- Navbar collapse content -->
+	        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+	            <!-- Navbar links -->
+	            <ul class="navbar-nav mr-auto">
+	                <li class="nav-item active">
+	                    <a class="nav-link" href="/">Inicio</a>
+	                </li>
+	                <li class="nav-item">
+	                    <a class="nav-link" href="/categorias">Categorías</a>
+	                </li>
+	                <li class="nav-item">
+	                    <a class="nav-link" href="/marcas">Marcas</a>
+	                </li>
+	            </ul>
+	            <!-- User menu -->
+	            <ul class="navbar-nav ml-auto">
+	                <!-- Login (if not logged in) -->
+	                <li class="nav-item" th:if="${session.user == null}">
+	                    <a class="nav-link" href="#" data-toggle="modal" data-target="#loginModal">
+	                        <i class="far fa-user"></i>
+	                    </a>
+	                </li>
+	                <!-- Dropdown menu (if logged in) -->
+	                <li class="nav-item dropdown" th:if="${session.user != null}">
+	                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+	                        <i class="fa-solid fa-list"></i>
+	                    </a>
+						<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+						    <a class="dropdown-item" href="/perfil">Perfil</a>
+						    <a class="dropdown-item" href="/ordenes">Órdenes</a>
+						    <div class="dropdown-divider"></div>
+						    <a class="dropdown-item" href="/logout">Cerrar sesión</a>
+						</div>
+	                </li>
+	                <!-- Cart icon (if logged in) -->
+	                <li class="nav-item" th:if="${session.user != null}">
+	                    <a class="nav-link" href="/carrito" id="cartIcon">
+	                        <i class="fas fa-shopping-cart"></i>
+	                    </a>
+	                </li>
+	                <!-- Search icon and form -->
+	                <li class="nav-item">
+	                    <form class="form-inline my-2 my-lg-0" action="/search" method="get">
+	                        <input class="form-control mr-sm-2" type="search" placeholder="Buscar" aria-label="Search" name="query">
+	                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit"><i class="fas fa-search"></i></button>
+	                    </form>
+	                </li>
+	            </ul>
+	        </div>
+	    </div>
+	</nav>
+
+<!-- Contenido de la página -->
+<div class="container mt-5">
+	<!-- Mostrar el título con el ID del cliente si hay órdenes -->
+	<h1 class="text-center" th:if="${not ordenes.empty}">Órdenes del cliente: <span th:text="${ordenes.size() > 0 ? ordenes[0].cliente : ''}"></span></h1>
+
+	<!-- Mensaje cuando no hay órdenes -->
+	<div class="text-center" th:if="${ordenes.empty}">
+		<h2>Oppsss!</h2>
+	    <h3>No has comprado nada??? 😠</h3>
+	</div>
+
+    <!-- Iterar sobre cada orden -->
+    <div th:each="orden : ${ordenes}">
+        <!-- Título de la orden -->
+        <h3 class="font-weight-bold">Orden Número: <span th:text="${orden.id}"></span></h3>
+        <!-- Tabla para mostrar detalles de la orden -->
+        <table class="table table-bordered table-striped">
+            <thead class="thead-dark">
+            <tr>
+                <th>Total</th>
+                <th>Detalles</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <!-- Columna de Total -->
+                <td th:text="${orden.total}"></td>
+                <!-- Columna de Detalles con una subtabla -->
+                <td>
+                    <!-- Subtabla para los detalles de productos -->
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>Nombre del Producto</th>
+                            <th>Imágenes</th>
+                            <th>Precio Unitario</th>
+                            <th>Cantidad</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Iterar sobre cada detalle de la orden -->
+                        <tr th:each="detalle : ${orden.detalles}">
+                            <!-- Columna de Nombre del Producto -->
+                            <td th:text="${detalle.producto.nombre}"></td>
+                            <!-- Columna de Imágenes -->
+                            <td>
+                                <div class="d-flex flex-wrap">
+                                    <!-- Iterar sobre las imágenes del producto -->
+                                    <th:block th:each="imagen : ${detalle.producto.imagenes}">
+                                        <img th:src="${imagen.imagen}" class="producto-imagen mr-2 mb-2" alt="Imagen del Producto">
+                                    </th:block>
+                                </div>
+                            </td>
+                            <!-- Columna de Precio Unitario -->
+                            <td th:text="${detalle.producto.precio}"></td>
+                            <!-- Columna de Cantidad -->
+                            <td th:text="${detalle.cantidad}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Scripts de Bootstrap y Font Awesome aquí -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<!-- Script de Font Awesome -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
+</body>
+</html>
