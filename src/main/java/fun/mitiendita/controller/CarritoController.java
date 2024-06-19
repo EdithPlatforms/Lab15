@@ -33,7 +33,7 @@ public class CarritoController {
             // Llamar al servicio para agregar detalle al carrito
             carritoService.agregarDetalleCarrito(request, idProducto, cantidad, precioUnitario, carritoId);
 
-            return "redirect:/ordenes"; // Redirigir a la página principal u otra página según sea necesario
+            return "redirect:/"; // Redirigir a la página principal u otra página según sea necesario
         } else {
             // Manejar el caso de error al crear el carrito
             return "error"; // Por ejemplo, redirigir a una página de error

@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+!<!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Detalles del Carrito</title>
+    <title>Error de Pago</title>
 	<!-- Enlace a Bootstrap CSS -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 	<!-- Enlace a Font Awesome -->
@@ -103,78 +103,18 @@
 	    </div>
 	</nav>	
 	
-    <div class="container mt-5">
-        <h2 class="mb-4">Detalles del Carrito N° <span th:text="${carritoId}"></span></h2>
-        <table class="table table-bordered">
-            <thead class="thead-light">
-                <tr>
-                    <th>Producto</th>
-                    <th>Precio Unitario</th>
-                    <th>Cantidad</th>
-                    <th>Subtotal</th> <!-- Nueva columna para el subtotal -->
-                    <th>Acción</th> <!-- Nueva columna para el botón de eliminar -->
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Iterar sobre los detalles del carrito y mostrar cada producto -->
-                <tr th:each="detalle : ${detalles}">
-                    <td th:text="${detalle.producto}"></td>
-                    <td th:text="${detalle.precioUnitario}"></td>
-                    <td th:text="${detalle.cantidad}"></td>
-                    <td class="subtotal" th:text="${detalle.precioUnitario * detalle.cantidad}"></td> <!-- Calcular y mostrar el subtotal -->
-                    <td>
-                        <form th:action="@{/eliminarDetalle}" method="post" style="display:inline;">
-                            <input type="hidden" th:name="detalleId" th:value="${detalle.id}" />
-                            <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
-                        </form>
-                    </td> <!-- Botón de eliminar -->
-                </tr>
-            </tbody>
-            <tfoot>
-                <tr>
-                    <td colspan="4" class="text-right"><strong>Total</strong></td>
-                    <td id="total"></td>
-                </tr>
-            </tfoot>
-        </table>
-		<!--
-		<form th:action="@{/marcarCarritoComoPagado}" method="post">
-		    <input type="hidden" th:name="total" th:value="${total}" />
-		    <button type="submit" class="btn btn-primary">Marcar Carrito como Pagado</button>
-		</form>
-		-->
-
-		<!-- Paypal -->
-		<form method="post" action="/payment/create" class="mt-5 card p-3">
-			<!-- Campo oculto para enviar el monto -->
-			<input type="hidden" id="amount" name="amount" value="">
-
-			<div class="d-flex justify-content-center">
-				<button type="submit" class="btn btn-primary" onclick="setAmount()">
-					Pay con Paypal
-				</button>
-			</div>
-		</form>
-    </div>
+    <div class="container">
+		<h1 class="text-center mt-5 text-danger">Error de Pago</h1>
+		<p class="text mt-3">Error al completar el pago. 
+			Por favor, vuelve a intentarlo.
+		</p>
+		<div class="d-flex justify-content-center">
+			<a class="btn btn-primary" href="/carrito">
+				Ir a Carrito
+			</a>
+		</div>
+	</div>
 	
-	
-    <script>
-		document.addEventListener('DOMContentLoaded', function() {
-		let subtotals = document.querySelectorAll('.subtotal');
-		let total = 0;
-		subtotals.forEach(function(subtotal) {
-			total += parseFloat(subtotal.textContent);
-		});
-		let totalElement = document.getElementById('total');
-		totalElement.textContent = total.toFixed(2);
-
-		// Actualizar el valor del input oculto 'amount' para Paypal
-		let amountInput = document.getElementById('amount');
-		amountInput.value = total.toFixed(2);
-	});
-
-
-	</script>
 	
 		<!-- Scripts al final para mejorar el rendimiento -->
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
