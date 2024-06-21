@@ -2,10 +2,8 @@ package fun.mitiendita.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import fun.mitiendita.model.Carrito;
 import fun.mitiendita.model.DetalleCarrito;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -32,7 +30,24 @@ public class CarritoService {
     @Value("${api.url}")
     private String apiUrl;
 
+    public Long obtenerCarritoExistente(HttpServletRequest request) {
+        String carritoIdStr = getCookieValue(request, "carritoId");
+        if (carritoIdStr != null) {
+            try {
+                return Long.parseLong(carritoIdStr);
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid carritoId in cookie: " + carritoIdStr);
+            }
+        }
+        return null;
+    }
+
     public Long eliminarCarritosYCrearNuevo(HttpServletRequest request, HttpServletResponse response) {
+        Long carritoId = obtenerCarritoExistente(request);
+        if (carritoId != null) {
+            return carritoId;
+        }
+
         String accessToken = getCookieValue(request, "accessToken");
         int clienteId = Integer.parseInt(getCookieValue(request, "id"));
 
@@ -80,49 +95,7 @@ public class CarritoService {
         if (apiResponse.getStatusCode().is2xxSuccessful()) {
             try {
                 JsonNode responseBody = new ObjectMapper().readTree(apiResponse.getBody());
-                Long carritoId = responseBody.get("id").asLong();
-
-                // Guardar carritoId en las cookies
-                Cookie cookie = new Cookie("carritoId", carritoId.toString());
-                cookie.setPath("/");
-                response.addCookie(cookie);
-
-                System.out.println("Nuevo carrito creado exitosamente para el cliente con ID: " + clienteId);
-                return carritoId;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            System.err.println("Error al crear el carrito. Código de respuesta: " + apiResponse.getStatusCodeValue());
-        }
-
-        return null;
-    }
-
-
-    public Long agregarCarrito(HttpServletRequest request, HttpServletResponse response) {
-        String accessToken = getCookieValue(request, "accessToken");
-        int clienteId = Integer.parseInt(getCookieValue(request, "id"));
-
-        String crearCarritoUrl = apiUrl + "carritos/";
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("accessToken", accessToken);
-        headers.set("Content-Type", "application/json");
-
-        String requestBody = "{\"cliente\": " + clienteId + "}";
-
-        HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
-        ResponseEntity<String> apiResponse = restTemplate.exchange(
-                crearCarritoUrl,
-                HttpMethod.POST,
-                requestEntity,
-                String.class);
-
-        if (apiResponse.getStatusCode().is2xxSuccessful()) {
-            try {
-                JsonNode responseBody = new ObjectMapper().readTree(apiResponse.getBody());
-                Long carritoId = responseBody.get("id").asLong();
+                carritoId = responseBody.get("id").asLong();
 
                 // Guardar carritoId en las cookies
                 Cookie cookie = new Cookie("carritoId", carritoId.toString());
@@ -178,10 +151,8 @@ public class CarritoService {
         }
         return null;
     }
-    
-    //Get
+
     public List<Carrito> obtenerCarritos(HttpServletRequest request) {
-        // Obtener el carritoId de la cookie
         String carritoIdStr = getCookieValue(request, "carritoId");
         if (carritoIdStr == null) {
             System.err.println("No se encontró el ID del carrito en las cookies.");
@@ -211,14 +182,13 @@ public class CarritoService {
                     System.out.println("ID: " + carrito.getId());
                     System.out.println("Cliente: " + carrito.getCliente());
 
-                    // Procesar detalles del carrito para ajustar el producto
                     List<DetalleCarrito> detalles = carrito.getDetalles();
                     if (detalles != null && !detalles.isEmpty()) {
                         for (DetalleCarrito detalle : detalles) {
                             System.out.println("ID Detalle: " + detalle.getId());
                             System.out.println("Cantidad: " + detalle.getCantidad());
                             System.out.println("Precio Unitario: " + detalle.getPrecioUnitario());
-                            System.out.println("Producto: " + detalle.getProducto());  // Mostrar el nombre del producto
+                            System.out.println("Producto: " + detalle.getProducto());
                             System.out.println("--------------------------------------");
                         }
                     }
@@ -235,7 +205,7 @@ public class CarritoService {
 
         return null;
     }
-    
+
     public void eliminarDetalleCarrito(HttpServletRequest request, Long detalleId) {
         String accessToken = getCookieValue(request, "accessToken");
 
@@ -261,4 +231,3 @@ public class CarritoService {
     }
 
 }
-
